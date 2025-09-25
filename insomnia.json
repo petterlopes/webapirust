@@ -1,0 +1,307 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2025-09-23T20:35:58.1572156-03:00",
+  "__export_source": "insomnia.desktop.app:webrust",
+  "resources": [
+    {
+      "_id": "wrk_webrust",
+      "parentId": null,
+      "modified": 0,
+      "created": 0,
+      "name": "WebRust API",
+      "description": "Colecao de chamadas para a API Axum",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "env_webrust_base",
+      "parentId": "wrk_webrust",
+      "modified": 0,
+      "created": 0,
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:8080",
+        "metrics_url": "http://localhost:9090",
+        "grafana_url": "http://localhost:3000",
+        "user_id": "00000000-0000-0000-0000-000000000000",
+        "admin_email": "admin@webrust.dev",
+        "admin_password": "ChangeMe123!",
+        "admin_name": "WebRust Admin",
+        "bearer_token": "{{ response 'body', 'req_auth_login', 'json', 'access_token' }}"
+      },
+      "dataPropertyOrder": null,
+      "color": null,
+      "isPrivate": false,
+      "metaSerialized": null,
+      "_type": "environment"
+    },
+    {
+      "_id": "fld_users",
+      "parentId": "wrk_webrust",
+      "modified": 0,
+      "created": 0,
+      "name": "Users",
+      "description": "",
+      "environment": null,
+      "environmentPropertyOrder": null,
+      "metaSortKey": 0,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_users_create",
+      "parentId": "fld_users",
+      "modified": 0,
+      "created": 0,
+      "name": "Create User",
+      "method": "POST",
+      "url": "{{ base_url }}/users",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Ada Lovelace\",\n  \"email\": \"ada@example.com\",\n  \"password\": \"Sup3rSecure!\",\n  \"role\": \"viewer\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ bearer_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1,
+      "isPrivate": false,
+      "_type": "request"
+    },
+    {
+      "_id": "req_users_list",
+      "parentId": "fld_users",
+      "modified": 0,
+      "created": 0,
+      "name": "List Users",
+      "method": "GET",
+      "url": "{{ base_url }}/users",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ bearer_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -2,
+      "isPrivate": false,
+      "_type": "request"
+    },
+    {
+      "_id": "req_users_get",
+      "parentId": "fld_users",
+      "modified": 0,
+      "created": 0,
+      "name": "Get User",
+      "method": "GET",
+      "url": "{{ base_url }}/users/{{ user_id }}",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ bearer_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -3,
+      "isPrivate": false,
+      "_type": "request"
+    },
+    {
+      "_id": "req_users_update",
+      "parentId": "fld_users",
+      "modified": 0,
+      "created": 0,
+      "name": "Update User",
+      "method": "PUT",
+      "url": "{{ base_url }}/users/{{ user_id }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Ada Byron\",\n  \"email\": \"ada.byron@example.com\",\n  \"password\": \"N3wPassw0rd!\",\n  \"role\": \"admin\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ bearer_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -4,
+      "isPrivate": false,
+      "_type": "request"
+    },
+    {
+      "_id": "req_users_delete",
+      "parentId": "fld_users",
+      "modified": 0,
+      "created": 0,
+      "name": "Delete User",
+      "method": "DELETE",
+      "url": "{{ base_url }}/users/{{ user_id }}",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ bearer_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -5,
+      "isPrivate": false,
+      "_type": "request"
+    },
+    {
+      "_id": "fld_operations",
+      "parentId": "wrk_webrust",
+      "modified": 0,
+      "created": 0,
+      "name": "Operations",
+      "description": "",
+      "environment": null,
+      "environmentPropertyOrder": null,
+      "metaSortKey": 1,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_health",
+      "parentId": "fld_operations",
+      "modified": 0,
+      "created": 0,
+      "name": "Health Check",
+      "method": "GET",
+      "url": "{{ base_url }}/health",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1,
+      "isPrivate": false,
+      "_type": "request"
+    },
+    {
+      "_id": "req_metrics",
+      "parentId": "fld_operations",
+      "modified": 0,
+      "created": 0,
+      "name": "App Metrics",
+      "method": "GET",
+      "url": "{{ base_url }}/metrics",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -2,
+      "isPrivate": false,
+      "_type": "request"
+    },
+    {
+      "_id": "fld_observability",
+      "parentId": "wrk_webrust",
+      "modified": 0,
+      "created": 0,
+      "name": "Observability",
+      "description": "",
+      "environment": null,
+      "environmentPropertyOrder": null,
+      "metaSortKey": 2,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_prometheus_query",
+      "parentId": "fld_observability",
+      "modified": 0,
+      "created": 0,
+      "name": "Prometheus Query (Requests)",
+      "method": "GET",
+      "url": "{{ metrics_url }}/api/v1/query",
+      "body": {},
+      "parameters": [
+        {
+          "name": "query",
+          "value": "axum_http_requests_total"
+        }
+      ],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1,
+      "isPrivate": false,
+      "_type": "request"
+    },
+    {
+      "_id": "req_grafana_health",
+      "parentId": "fld_observability",
+      "modified": 0,
+      "created": 0,
+      "name": "Grafana Health",
+      "method": "GET",
+      "url": "{{ grafana_url }}/api/health",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -2,
+      "isPrivate": false,
+      "_type": "request"
+    },
+    {
+      "_id": "fld_auth",
+      "parentId": "wrk_webrust",
+      "modified": 0,
+      "created": 0,
+      "name": "Auth",
+      "description": "Fluxos de autenticação",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_auth_login",
+      "parentId": "fld_auth",
+      "modified": 0,
+      "created": 0,
+      "url": "{{ base_url }}/auth/login",
+      "name": "Login",
+      "description": "Obtém o token JWT de acesso",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"{{ admin_email }}\",\n  \"password\": \"{{ admin_password }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 0,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    }
+  ]
+}

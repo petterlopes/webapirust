@@ -1,0 +1,20 @@
+﻿server:
+  host: 0.0.0.0
+  port: 8080
+database:
+  uri: postgres://postgres:postgres@db:5432/webrust
+  max_connections: 5
+telemetry:
+  service_name: webrust-api
+  log_level: info
+rate_limit:
+  requests_per_second: 5
+  burst_capacity: 10
+auth:
+  jwt_secret: change-me-in-prod
+  jwt_ttl_minutes: 60
+bootstrap:
+  enabled: true
+  admin_name: WebRust Admin
+  admin_email: admin@webrust.dev
+  admin_password: ChangeMe123!

@@ -1,0 +1,76 @@
+﻿version: "3.9"
+
+services:
+  app:
+    build: .
+    command: ["webrust"]
+    ports:
+      - "8080:8080"
+    environment:
+      APP__SERVER__HOST: 0.0.0.0
+      APP__SERVER__PORT: 8080
+      APP__DATABASE__URI: postgres://postgres:postgres@db:5432/webrust
+      APP__DATABASE__MAX_CONNECTIONS: 5
+      APP__TELEMETRY__SERVICE_NAME: webrust-api
+      APP__TELEMETRY__LOG_LEVEL: info
+      APP__RATE_LIMIT__REQUESTS_PER_SECOND: 10
+      APP__RATE_LIMIT__BURST_CAPACITY: 20
+      APP__BOOTSTRAP__ENABLED: true
+      APP__BOOTSTRAP__ADMIN_NAME: WebRust Admin
+      APP__BOOTSTRAP__ADMIN_EMAIL: admin@webrust.dev
+      APP__BOOTSTRAP__ADMIN_PASSWORD: ChangeMe123!
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: webrust
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./monitoring/grafana/dashboards/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml:ro
+      - ./monitoring/grafana/dashboards/json:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  prometheus-data:
+  grafana-data:
+
