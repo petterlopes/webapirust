@@ -6,6 +6,7 @@ metadata:
     {{- include "webrust.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  progressDeadlineSeconds: 1800
   selector:
     matchLabels:
       {{- include "webrust.selectorLabels" . | nindent 6 }}
