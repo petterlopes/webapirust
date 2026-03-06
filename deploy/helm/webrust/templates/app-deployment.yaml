@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "webrust.fullname" . }}
+  labels:
+    {{- include "webrust.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "webrust.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        {{- include "webrust.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: api
+        {{- range $k, $v := .Values.labels }}
+        {{ $k }}: {{ $v | quote }}
+        {{- end }}
+    spec:
+      initContainers:
+        - name: fetch-source
+          image: alpine/git:2.47.2
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              git clone --depth {{ .Values.source.cloneDepth }} --branch {{ .Values.source.revision }} {{ .Values.source.repoUrl }} /workspace
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+        - name: build-binary
+          image: "{{ .Values.build.image.repository }}:{{ .Values.build.image.tag }}"
+          imagePullPolicy: {{ .Values.build.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              apt-get update
+              apt-get install -y --no-install-recommends pkg-config libssl-dev libpq-dev
+              cd /workspace
+              cargo build --release --locked
+          resources:
+            {{- toYaml .Values.build.resources | nindent 12 }}
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+      containers:
+        - name: webrust
+          image: "{{ .Values.runtime.image.repository }}:{{ .Values.runtime.image.tag }}"
+          imagePullPolicy: {{ .Values.runtime.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -ec
+            - /workspace/target/release/webrust
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+          env:
+            - name: APP__SERVER__HOST
+              value: 0.0.0.0
+            - name: APP__SERVER__PORT
+              value: {{ .Values.service.port | quote }}
+            - name: APP__DATABASE__URI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "webrust.fullname" . }}-db
+                  key: DATABASE_URI
+            - name: APP__DATABASE__MAX_CONNECTIONS
+              value: "5"
+            - name: APP__TELEMETRY__SERVICE_NAME
+              value: webrust-api
+            - name: APP__TELEMETRY__LOG_LEVEL
+              value: {{ .Values.app.env.logLevel | quote }}
+            - name: APP__AUTH__JWT_SECRET
+              value: {{ .Values.app.env.jwtSecret | quote }}
+            - name: APP__AUTH__JWT_TTL_MINUTES
+              value: {{ .Values.app.env.jwtTtlMinutes | quote }}
+            - name: APP__BOOTSTRAP__ENABLED
+              value: {{ ternary "true" "false" .Values.app.env.bootstrapEnabled | quote }}
+            - name: APP__BOOTSTRAP__ADMIN_NAME
+              value: {{ .Values.app.env.adminName | quote }}
+            - name: APP__BOOTSTRAP__ADMIN_EMAIL
+              value: {{ .Values.app.env.adminEmail | quote }}
+            - name: APP__BOOTSTRAP__ADMIN_PASSWORD
+              value: {{ .Values.app.env.adminPassword | quote }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.app.readinessPath }}
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.app.livenessPath }}
+              port: http
+            initialDelaySeconds: 40
+            periodSeconds: 20
+            timeoutSeconds: 5
+          resources:
+            {{- toYaml .Values.runtime.resources | nindent 12 }}
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+      volumes:
+        - name: workspace
+          emptyDir: {}

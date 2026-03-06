@@ -1,0 +1,86 @@
+replicaCount: 1
+
+nameOverride: ""
+fullnameOverride: ""
+
+labels:
+  compliance.peritumct/classification: internal
+
+source:
+  repoUrl: "https://github.com/petterlopes/webapirust.git"
+  revision: "main"
+  cloneDepth: 1
+
+build:
+  image:
+    repository: rust
+    tag: "1.90-bookworm"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "512Mi"
+    limits:
+      cpu: "2000m"
+      memory: "2Gi"
+
+runtime:
+  image:
+    repository: rust
+    tag: "1.90-bookworm"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "1000m"
+      memory: "1Gi"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: webrust.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+database:
+  image:
+    repository: postgres
+    tag: "15.8-alpine"
+    pullPolicy: IfNotPresent
+  name: webrust
+  user: postgres
+  password: postgres
+  port: 5432
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClassName: ""
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "768Mi"
+
+app:
+  env:
+    logLevel: info
+    jwtSecret: change-me-in-prod
+    jwtTtlMinutes: 60
+    bootstrapEnabled: true
+    adminName: "WebRust Admin"
+    adminEmail: admin@webrust.dev
+    adminPassword: ChangeMe123!
+  readinessPath: /health
+  livenessPath: /health

@@ -103,6 +103,22 @@ Servicos iniciados:
 
 Sempre que atualizar o codigo da API, rode `docker compose build app --no-cache && docker compose up -d app` para reconstruir o binario.
 
+## Kubernetes (Helm)
+O repositório inclui um chart Helm em `deploy/helm/webrust`.
+
+Instalação:
+```bash
+helm upgrade --install webrust ./deploy/helm/webrust \
+  --namespace webrust \
+  --create-namespace
+```
+
+Notas operacionais:
+- O pod da API faz clone do próprio repositório (`source.repoUrl`) e compila o binário em initContainer.
+- O primeiro arranque pode demorar alguns minutos por causa do build Rust no cluster.
+- A API fica exposta por `Service` na porta `8080`.
+- Para ArgoCD, usar `path: deploy/helm/webrust` e `targetRevision: main`.
+
 ## Execucao com Rancher Desktop / nerdctl
 1. Aponte o contexto Docker:
    ```powershell
